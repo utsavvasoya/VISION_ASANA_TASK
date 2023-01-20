@@ -8,11 +8,7 @@ exports.addStudent = async (req, res) => {
     try {
         const schema = joi.object({
             studentId: joi.string().required().label("Student id"),
-            science: joi.number().min(0).max(100).required().label("Science"),
-            gujarati: joi.number().min(0).max(100).required().label("Gujarati"),
-            hindi: joi.number().min(0).max(100).required().label("Hindi"),
-            maths: joi.number().min(0).max(100).required().label("Maths"),
-            english: joi.number().min(0).max(100).required().label("English"),
+            subjects: joi.array().items({ subject: joi.string().required(), marks: joi.number().min(0).max(100).required() }).required().label("Subject")
         });
         const { error } = schema.validate(req.body);
         if (error) {
@@ -20,14 +16,10 @@ exports.addStudent = async (req, res) => {
                 message: error.message,
             });
         } else {
-            let { studentId, science, gujarati, hindi, maths, english } = req.body;
+            let { studentId, subjects } = req.body;
             const newStudent = new studentSchema({
                 studentId,
-                science,
-                gujarati,
-                hindi,
-                maths,
-                english,
+                subjects
             });
             const findStudentById = await registerSchema.findOne({ _id: studentId });
             if (!findStudentById) {
@@ -71,13 +63,15 @@ exports.getStudentWithMarks = async (req, res) => {
         studentSchema.aggregate(
             [
                 {
-                    $addFields: {
-                        total: {
-                            $sum: {
-                                $add: ["$english", "$maths", "$hindi", "$gujarati", "$science"],
-                            },
-                        },
-                    },
+                    $unwind: {
+                        path: '$subjects'
+                    }
+                },
+                {
+                    $group: {
+                        "_id": ["$_id"],
+                        "total": { $sum: { $sum: "$subjects.marks" } }
+                    }
                 },
                 { $match: { total: { $gt: 490 } } },
             ],
@@ -209,6 +203,63 @@ exports.getStudentCard = async (req, res) => {
                         })
                 }
 
+            }
+        );
+    } catch (err) {
+        console.log(err);
+        return res.json({
+            message: "Unable to add student.",
+        });
+    }
+};
+
+exports.getStudentMarksIndividual = async (req, res) => {
+    try {
+        studentSchema.aggregate(
+            [
+                {
+                    $lookup: {
+                        'from': 'registers',
+                        'localField': 'studentId',
+                        'foreignField': '_id',
+                        'as': 'result'
+                    }
+                }, {
+                    $match: {
+                        $or: [
+                            { maths: { $eq: 90 } },
+                            { gujarati: { $eq: 90 } },
+                            { hindi: { $eq: 90 } },
+                            { science: { $eq: 90 } },
+                            { english: { $eq: 90 } },
+                        ],
+                    }
+                }
+            ],
+            (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.json({
+                        message: "Something went wrong.",
+                    });
+                }
+                var response = [];
+                data.forEach((e) => {
+                    var subejct = []
+                    Object.keys(e).find((k) => {
+                        if (e[k] == 90) {
+                            subejct.push(k)
+                        }
+                    });
+                    if (subejct.length) {
+                        response.push({
+                            mark: 90,
+                            subject: subejct,
+                            name: e.result[0].username
+                        })
+                    }
+                });
+                return res.json(response);
             }
         );
     } catch (err) {

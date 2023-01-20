@@ -4,20 +4,8 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'registers'
     },
-    english: {
-        type: Number
-    },
-    maths: {
-        type: Number
-    },
-    hindi: {
-        type: Number
-    },
-    gujarati: {
-        type: Number
-    },
-    science: {
-        type: Number
+    subjects: {
+        type: Array
     }
 });
 module.exports = mongoose.model("student", studentSchema);
