@@ -67,10 +67,10 @@ exports.login = async (req, res) => {
             if (ismatch) {
                 let token = jwt.sign(
                     {
-                        user_id: findStudent._id,
+                        student_id: findStudent._id,
                         email: findStudent.email,
                     },
-                    "123456789",
+                    process.env.TOKEN_SECRET,
                     { expiresIn: "7 days" }
                 );
 
@@ -78,7 +78,6 @@ exports.login = async (req, res) => {
                     data: findStudent,
                     token: `Bearer ${token}`,
                 };
-
                 return res.json({
                     Login: result,
                     message: "You are now logged in."

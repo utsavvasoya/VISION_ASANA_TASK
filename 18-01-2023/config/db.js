@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const url = "mongodb://localhost:27017/18-01-2022_StudentWithMarks"
+const url = process.env.DB_URL
 
 const database = mongoose.connect(url, (err, succ) => {
     if (err) {

@@ -4,11 +4,10 @@ const joi = require("joi");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
-exports.addStudent = async (req, res) => {
+exports.addStudentMarks = async (req, res) => {
     try {
         const schema = joi.object({
-            studentId: joi.string().required().label("Student id"),
-            subjects: joi.array().items({ subject: joi.string().required(), marks: joi.number().min(0).max(100).required() }).required().label("Subject")
+            subjects: joi.array().items(joi.object({ subject: joi.string().required(), marks: joi.number().min(0).max(100).required() })).required().label("Subject")
         });
         const { error } = schema.validate(req.body);
         if (error) {
@@ -16,7 +15,9 @@ exports.addStudent = async (req, res) => {
                 message: error.message,
             });
         } else {
-            let { studentId, subjects } = req.body;
+            req.body.subjects.map((res) => (res.marks = Number(res.marks)))
+            var { subjects } = req.body;
+            var studentId = req.user.student_id
             const newStudent = new studentSchema({
                 studentId,
                 subjects
@@ -102,15 +103,13 @@ exports.getStudentBtw = async (req, res) => {
         studentSchema.aggregate(
             [
                 {
-                    $match: {
-                        $or: [
-                            { maths: { $gt: 75, $lt: 90 } },
-                            { gujarati: { $gt: 75, $lt: 90 } },
-                            { hindi: { $gt: 75, $lt: 90 } },
-                            { science: { $gt: 75, $lt: 90 } },
-                            { english: { $gt: 75, $lt: 90 } },
-                        ],
-                    },
+                    $unwind: {
+                        path: '$subjects'
+                    }
+                },
+                {
+                    $match:
+                        { "subjects.marks": { $gt: 75, $lt: 90 } }
                 }, {
                     $lookup: {
                         'from': 'registers',
@@ -129,12 +128,11 @@ exports.getStudentBtw = async (req, res) => {
                 }
                 var result = [];
                 for (let i = 0; i < data.length; i++) {
-                    const name = data[i].result[0].username;
+                    const name = data[i].result[0].email;
                     result.push(name)
                 }
                 return res.json({
-                    name: result,
-                    count: data.length
+                    count: [... new Set(result)].length
                 });
             }
         );
@@ -151,14 +149,13 @@ exports.getStudentCard = async (req, res) => {
         studentSchema.aggregate(
             [
                 {
+                    $unwind: {
+                        path: '$subjects'
+                    }
+                },
+                {
                     $match: {
-                        $or: [
-                            { maths: { $lte: 35 } },
-                            { gujarati: { $lte: 35 } },
-                            { hindi: { $lte: 35 } },
-                            { science: { $lte: 35 } },
-                            { english: { $lte: 35 } },
-                        ],
+                        "subjects.marks": { $lte: 35 },
                         studentId: ObjectId(req.body.studentId)
                     },
                 }
@@ -176,25 +173,30 @@ exports.getStudentCard = async (req, res) => {
                     studentSchema.aggregate(
                         [
                             {
+                                $unwind: {
+                                    path: '$subjects'
+                                }
+                            },
+                            {
                                 $match: {
                                     studentId: ObjectId(req.body.studentId)
                                 }
                             },
                             {
-                                $addFields: {
-                                    total: {
-                                        $sum: {
-                                            $add: ["$english", "$maths", "$hindi", "$gujarati", "$science"],
-                                        },
-                                    },
-                                },
-                            }
+                                $group: {
+                                    "_id": ["$_id"],
+                                    "total": { $sum: { $sum: "$subjects.marks" } }
+                                }
+                            },
                         ], (err, data) => {
                             if (err) {
                                 console.log(err);
                                 return res.json({
                                     message: "Something went wrong.",
                                 });
+                            }
+                            if (data.length == 0) {
+                                return res.json({ message: "Student not found" });
                             }
                             if (data[0].total > 375) {
                                 return res.json({ data, Grad: "Distinction" });
@@ -218,6 +220,14 @@ exports.getStudentMarksIndividual = async (req, res) => {
         studentSchema.aggregate(
             [
                 {
+                    $unwind: {
+                        path: '$subjects'
+                    }
+                }, {
+                    $match:
+                        { "subjects.marks": { $eq: 90 } },
+                },
+                {
                     $lookup: {
                         'from': 'registers',
                         'localField': 'studentId',
@@ -225,14 +235,11 @@ exports.getStudentMarksIndividual = async (req, res) => {
                         'as': 'result'
                     }
                 }, {
-                    $match: {
-                        $or: [
-                            { maths: { $eq: 90 } },
-                            { gujarati: { $eq: 90 } },
-                            { hindi: { $eq: 90 } },
-                            { science: { $eq: 90 } },
-                            { english: { $eq: 90 } },
-                        ],
+                    $project: {
+                        "subjects.subject": 1,
+                        "subjects.marks": 1,
+                        "result.username": 1,
+                        _id: 0,
                     }
                 }
             ],
@@ -243,23 +250,7 @@ exports.getStudentMarksIndividual = async (req, res) => {
                         message: "Something went wrong.",
                     });
                 }
-                var response = [];
-                data.forEach((e) => {
-                    var subejct = []
-                    Object.keys(e).find((k) => {
-                        if (e[k] == 90) {
-                            subejct.push(k)
-                        }
-                    });
-                    if (subejct.length) {
-                        response.push({
-                            mark: 90,
-                            subject: subejct,
-                            name: e.result[0].username
-                        })
-                    }
-                });
-                return res.json(response);
+                return res.json(data);
             }
         );
     } catch (err) {
@@ -269,3 +260,15 @@ exports.getStudentMarksIndividual = async (req, res) => {
         });
     }
 };
+
+exports.getAllStudentMarks = async (req, res) => {
+    try {
+        const getAllStudent = await studentSchema.find();
+        return res.json(getAllStudent);
+    } catch {
+        console.log(err);
+        return res.json({
+            message: "Unable to get student.",
+        });
+    }
+}
