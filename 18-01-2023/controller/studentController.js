@@ -7,6 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 exports.addStudentMarks = async (req, res) => {
     try {
         const schema = joi.object({
+            studentId: joi.string().required().label("Student id"),
             subjects: joi.array().items(joi.object({ subject: joi.string().required(), marks: joi.number().min(0).max(100).required() })).required().label("Subject")
         });
         const { error } = schema.validate(req.body);
@@ -15,9 +16,8 @@ exports.addStudentMarks = async (req, res) => {
                 message: error.message,
             });
         } else {
+            let { studentId, subjects } = req.body;
             req.body.subjects.map((res) => (res.marks = Number(res.marks)))
-            var { subjects } = req.body;
-            var studentId = req.user.student_id
             const newStudent = new studentSchema({
                 studentId,
                 subjects
@@ -30,6 +30,15 @@ exports.addStudentMarks = async (req, res) => {
             }
             const findStudent = await studentSchema.findOne({ studentId });
             if (findStudent) {
+                var result = [];
+                result = findStudent.subjects.filter((cv) => {
+                    return !subjects.find((e) => {
+                        return e.subject == cv.subject;
+                    });
+                });
+                result.map((res) => {
+                    subjects.push(res);
+                });
                 const updateStudent = await studentSchema.findByIdAndUpdate(
                     findStudent.id,
                     req.body,
@@ -76,15 +85,18 @@ exports.getStudentWithMarks = async (req, res) => {
                 },
                 { $match: { total: { $gt: 490 } } },
             ],
-            (err, data) => {
+            async (err, data) => {
                 if (err) {
                     console.log(err);
                     return res.json({
                         message: "Something went wrong.",
                     });
                 }
+                const getAllStudent = await studentSchema.find();
+                const totalStudentLt490 = getAllStudent.length - data.length;
                 return res.json({
                     data,
+                    totalStudentLt490,
                     count: data.length,
                     message: "Student get successfully.",
                 });
@@ -243,14 +255,20 @@ exports.getStudentMarksIndividual = async (req, res) => {
                     }
                 }
             ],
-            (err, data) => {
+            async (err, data) => {
                 if (err) {
                     console.log(err);
                     return res.json({
                         message: "Something went wrong.",
                     });
                 }
-                return res.json(data);
+                const getAllStudent = await studentSchema.find();
+                const totalStudentNE90 = getAllStudent.length - data.length;
+                return res.json({
+                    data,
+                    totalStudentNE90,
+                    count: data.length ? data.length : 0,
+                });
             }
         );
     } catch (err) {

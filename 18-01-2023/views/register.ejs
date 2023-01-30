@@ -9,7 +9,8 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-
+    <script src="/toasting.js"></script>
+    <link rel="stylesheet" href="/toasting.css">
     <title>Document</title>
     <style>
         .divider:after,
@@ -97,8 +98,10 @@
                 dataType: "json",
                 success: function (result) {
                     if (result && result.newStudent) {
-                        alert("You are successfully registred. Please login.")
-                        window.location.href = "/login"
+                        showMessage("You are successfully registred. Please login.")
+                        setTimeout(() => {
+                            window.location.href = "/login"
+                        }, 1000);
                     } else {
                         document.getElementById("error").innerHTML = '<p>' + result.message + '<p>';
                     }
@@ -106,6 +109,15 @@
             });
         })
     })
+    function showMessage(msg) {
+        toasting.create({
+            "title": "Success",
+            "text": msg,
+            "type": "success",
+            "progressBarType": "success",
+            "timeout": 1000
+        });
+    }
 </script>
 
 </html>

@@ -3,7 +3,10 @@ const router = express.Router();
 const { addStudentMarks, getStudentWithMarks, getStudentBtw, getStudentCard, getStudentMarksIndividual, getAllStudentMarks } = require('../controller/studentController');
 const { verifyStudent } = require('../middleware/studentAuth');
 
-router.post('/addStudentMarks', verifyStudent, addStudentMarks)
+router.get('/dashbord', (req, res) => {
+    res.render("dashbord")
+})
+router.post('/addStudentMarks', addStudentMarks)
 router.get('/getStudentWithMarks', getStudentWithMarks)
 router.get('/getStudentMarksIndividual', getStudentMarksIndividual)
 router.get('/getStudentCard', getStudentCard)

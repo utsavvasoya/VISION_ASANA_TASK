@@ -92,7 +92,7 @@
                         showMessage("You are now logged in.")
                         setTimeout(() => {
                             window.location.href = `/home?id=${result.Login.data._id}`
-                        }, 2000);
+                        }, 1000);
                     } else {
                         showErrMessage(result.message)
                         // document.getElementById("error").innerHTML = '<p>' + result.message + '<p>';

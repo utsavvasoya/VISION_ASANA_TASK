@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+</head>
+<body>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+    <div id="chartContainer1" style="height: 370px; width: 100%;"></div>
+</body>
+<script>
+    $(document).ready(() => {
+        $.ajax({
+            type: "GET",
+            url: "/getStudentWithMarks",
+            dataType: "json",
+            success: function (result) {
+                if (result.data.length > 0) {
+                    var options = {
+                        title: {
+                            text: "Marks greeter than 490"
+                        },
+                        animationEnabled: true,
+                        data: [{
+                            type: "pie",
+                            startAngle: 40,
+                            toolTipContent: "<b>{label}</b>: {y}%",
+                            showInLegend: "true",
+                            legendText: "{label}",
+                            indexLabelFontSize: 16,
+                            indexLabel: "{label} - {y}%",
+                            dataPoints: [
+                                { y: result.totalStudentLt490, label: "Lessthan490" },
+                                { y: result.count, label: "Greterthan490" },
+                            ]
+                        }]
+                    };
+                    $("#chartContainer").CanvasJSChart(options);
+                } else {
+                    document.getElementById("error").innerHTML = '<p>' + result.message + '<p>';
+                }
+            },
+        })
+        $.ajax({
+            type: "GET",
+            url: "/getStudentMarksIndividual",
+            dataType: "json",
+            success: function (result) {
+                    console.log(result);
+                    var options = {
+                        title: {
+                            text: "90 marks in individual"
+                        },
+                        animationEnabled: true,
+                        data: [{
+                            type: "pie",
+                            startAngle: 40,
+                            toolTipContent: "<b>{label}</b>: {y}%",
+                            showInLegend: "true",
+                            legendText: "{label}",
+                            indexLabelFontSize: 16,
+                            indexLabel: "{label} - {y}%",
+                            dataPoints: [
+                                { y: result.totalStudentNE90, label: "Not90" },
+                                { y: result.count, label: "90" },
+                            ]
+                        }]
+                    };
+                    $("#chartContainer1").CanvasJSChart(options);
+            },
+        })
+    })
+</script>
+
+</html>
