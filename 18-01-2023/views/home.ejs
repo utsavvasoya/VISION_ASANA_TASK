@@ -167,8 +167,11 @@
             });
         })
         $('#dashbord').click((e) => {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const id = urlParams.get('id');
             e.preventDefault();
-            window.location.href = '/dashbord'
+            window.location.href = `/dashbord?id=${id}`
         })
     })
     var modal = document.getElementById("myModal");

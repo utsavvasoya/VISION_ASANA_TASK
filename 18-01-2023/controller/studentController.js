@@ -93,11 +93,11 @@ exports.getStudentWithMarks = async (req, res) => {
                     });
                 }
                 const getAllStudent = await studentSchema.find();
-                const totalStudentLt490 = getAllStudent.length - data.length;
+                const totalStudentLt490 = Number(((getAllStudent.length - data.length) / getAllStudent.length * 100).toFixed(2));
                 return res.json({
                     data,
                     totalStudentLt490,
-                    count: data.length,
+                    count: Number((data.length / getAllStudent.length * 100).toFixed(2)),
                     message: "Student get successfully.",
                 });
             }
@@ -131,7 +131,7 @@ exports.getStudentBtw = async (req, res) => {
                     }
                 }
             ],
-            (err, data) => {
+            async (err, data) => {
                 if (err) {
                     console.log(err);
                     return res.json({
@@ -143,8 +143,11 @@ exports.getStudentBtw = async (req, res) => {
                     const name = data[i].result[0].email;
                     result.push(name)
                 }
+                const getAllStudent = await studentSchema.find();
+                const totalStudentNotBtw75to90 = Number(((getAllStudent.length - [... new Set(result)].length) / getAllStudent.length * 100).toFixed(2));
                 return res.json({
-                    count: [... new Set(result)].length
+                    studentBtw75to90: Number(([... new Set(result)].length / getAllStudent.length * 100).toFixed(2)),
+                    totalStudentNotBtw75to90: totalStudentNotBtw75to90
                 });
             }
         );
@@ -172,15 +175,17 @@ exports.getStudentCard = async (req, res) => {
                     },
                 }
             ],
-            (err, data) => {
+            async (err, data) => {
                 if (err) {
                     console.log(err);
                     return res.json({
                         message: "Something went wrong.",
                     });
                 }
+                const findStudentById = await studentSchema.findOne({ studentId: req.body.studentId });
+                var subject = findStudentById.subjects;
                 if (data.length > 0) {
-                    return res.json({ Grad: "Fail" });
+                    return res.json({ data, subject, Grad: "Fail" });
                 } else {
                     studentSchema.aggregate(
                         [
@@ -199,19 +204,21 @@ exports.getStudentCard = async (req, res) => {
                                     "_id": ["$_id"],
                                     "total": { $sum: { $sum: "$subjects.marks" } }
                                 }
-                            },
-                        ], (err, data) => {
+                            }
+                        ], async (err, data) => {
                             if (err) {
                                 console.log(err);
                                 return res.json({
                                     message: "Something went wrong.",
                                 });
                             }
+                            const findStudentById = await studentSchema.findOne({ studentId: req.body.studentId });
+                            var subject = findStudentById.subjects;
                             if (data.length == 0) {
                                 return res.json({ message: "Student not found" });
                             }
                             if (data[0].total > 375) {
-                                return res.json({ data, Grad: "Distinction" });
+                                return res.json({ data, subject, Grad: "Distinction" });
                             }
                             return res.json({ data, msg: "Student pass" });
                         })
@@ -263,11 +270,11 @@ exports.getStudentMarksIndividual = async (req, res) => {
                     });
                 }
                 const getAllStudent = await studentSchema.find();
-                const totalStudentNE90 = getAllStudent.length - data.length;
+                const totalStudentNE90 = Number(((getAllStudent.length - data.length) / getAllStudent.length * 100).toFixed(2));
                 return res.json({
                     data,
                     totalStudentNE90,
-                    count: data.length ? data.length : 0,
+                    count: Number((data.length / getAllStudent.length * 100 ? data.length / getAllStudent.length * 100 : 0).toFixed(2)),
                 });
             }
         );
