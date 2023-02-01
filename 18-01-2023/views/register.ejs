@@ -103,7 +103,7 @@
                             window.location.href = "/login"
                         }, 1000);
                     } else {
-                        document.getElementById("error").innerHTML = '<p>' + result.message + '<p>';
+                        showErrMessage(result.message);
                     }
                 },
             });
@@ -115,6 +115,15 @@
             "text": msg,
             "type": "success",
             "progressBarType": "success",
+            "timeout": 1000
+        });
+    }
+    function showErrMessage(msg) {
+        toasting.create({
+            "title": "Error",
+            "text": msg,
+            "type": "error",
+            "progressBarType": "error",
             "timeout": 1000
         });
     }
