@@ -77,7 +77,6 @@
                         </div>
                     </div>
                 </div>
-                <div id="error" style="color: red;"></div>
                 <div class="modal-footer">
                     <button id="submit" class="btn btn-primary btn-block">Submit</button>
                 </div>
@@ -160,7 +159,7 @@
                             location.reload();
                         }, 1000);
                     } else {
-                        document.getElementById("error").innerHTML = '<p>' + result.message + '<p>';
+                        showErrMessage(result.message)
                     }
                 }
             });

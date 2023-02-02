@@ -297,3 +297,16 @@ exports.getAllStudentMarks = async (req, res) => {
         });
     }
 }
+
+exports.homePage = async (req, res) => {
+    try {
+        const data = await studentSchema.find();
+        const userData = await registerSchema.find();
+        res.render("home", { Data: data, UserData: userData })
+    } catch {
+        console.log(err);
+        return res.json({
+            message: "Unable to get home page."
+        });
+    }
+}
