@@ -16,7 +16,8 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        .modal {
+        .modal,
+        .paymentModel {
             display: none;
             position: fixed;
             z-index: 1;
@@ -38,7 +39,8 @@
             width: 25%;
         }
 
-        .close {
+        .close,
+        .closepayment {
             color: #aaaaaa;
             float: right;
             font-size: 28px;
@@ -46,7 +48,9 @@
         }
 
         .close:hover,
-        .close:focus {
+        .close:focus,
+        .closepayment:hover,
+        .closepayment:focus {
             color: #000;
             text-decoration: none;
             cursor: pointer;
@@ -57,6 +61,7 @@
 <body style="background-color: ivory;">
     <button id="myBtn" class="btn btn-primary float-right mt-3 mb-3 mr-2">Add Marks</button>
     <button id="dashbord" class="btn btn-primary float-right mt-3 mb-3 mr-2">Go to dashbord</button>
+    <button id="makepayment" class="btn btn-primary float-right mt-3 mb-3 mr-2">Make Payment</button>
 
     <div id="myModal" class="modal">
         <div class="modal-content">
@@ -79,6 +84,28 @@
                 </div>
                 <div class="modal-footer">
                     <button id="submit" class="btn btn-primary btn-block">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="paymentModel" class="modal">
+        <div class="modal-content">
+            <span class="closepayment">&times;</span>
+            <form>
+                <div class="container">
+                    <div>
+                        <div class="col-sm form-group">
+                            <label for="name">Bookname</label>
+                            <input id="bookname" name="bookname" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm form-group">
+                            <label for="name">Price</label>
+                            <input id="price" name="price" type="number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="paypal" class="btn btn-primary btn-block">Pay With Paypal</button>
                 </div>
             </form>
         </div>
@@ -144,9 +171,10 @@
             if (subjects.length == 0) {
                 return showErrMessage("Enter subject");
             }
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const id = urlParams.get('id');
+            // const queryString = window.location.search;
+            // const urlParams = new URLSearchParams(queryString);
+            // const id = urlParams.get('id');
+            const id = localStorage.getItem("id")
             $.ajax({
                 type: "POST",
                 url: "/addStudentMarks",
@@ -165,11 +193,11 @@
             });
         })
         $('#dashbord').click((e) => {
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const id = urlParams.get('id');
+            // const queryString = window.location.search;
+            // const urlParams = new URLSearchParams(queryString);
+            // const id = urlParams.get('id');
             e.preventDefault();
-            window.location.href = `/dashbord?id=${id}`
+            window.location.href = `/dashbord`
         })
     })
     var modal = document.getElementById("myModal");
@@ -186,6 +214,40 @@
             modal.style.display = "none";
         }
     }
+    var paymentModel = document.getElementById("paymentModel");
+    var paymentbtn = document.getElementById("makepayment");
+    var paymentspan = document.getElementsByClassName("closepayment")[0];
+    paymentbtn.onclick = function () {
+        paymentModel.style.display = "block";
+    }
+    paymentspan.onclick = function () {
+        paymentModel.style.display = "none";
+    }
+    window.onclick = function (event) {
+        if (event.target == paymentModel) {
+            paymentModel.style.display = "none";
+        }
+    }
+    $('#paypal').click((e) => {
+        debugger
+        e.preventDefault();
+        var bookname = $('#bookname').val()
+        var price = $('#price').val()
+        const data = { bookname, price }
+        $.ajax({
+            type: "POST",
+            url: "/pay",
+            dataType: "json",
+            data: data,
+            success: function (result) {
+                if (result.message) {
+                    window.location.href = result.message;
+                } else {
+                    showErrMessage("Something went wrong!")
+                }
+            }
+        });
+    })
     function showMessage(msg) {
         toasting.create({
             "title": "Success",

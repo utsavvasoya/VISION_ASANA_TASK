@@ -80,7 +80,6 @@
             var email = $('#email').val()
             var password = $('#password').val()
             const data = { email, password }
-            debugger
             $.ajax({
                 type: "POST",
                 url: "/login",
@@ -89,8 +88,9 @@
                 success: function (result) {
                     if (result && result.Login) {
                         showMessage("You are now logged in.")
+                        localStorage.setItem("id", result.Login.data._id)
                         setTimeout(() => {
-                            window.location.href = `/home?id=${result.Login.data._id}`
+                            window.location.href = `/home`
                         }, 1000);
                     } else {
                         showErrMessage(result.message)

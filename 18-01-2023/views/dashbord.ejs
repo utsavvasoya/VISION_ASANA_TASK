@@ -41,7 +41,7 @@
     $(document).ready(() => {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        const id = urlParams.get('id');
+        // const id = localStorage.getItem(id);
         $.ajax({
             type: "GET",
             url: "/getStudentWithMarks",
@@ -127,7 +127,7 @@
             type: "POST",
             url: "/getStudentCard",
             dataType: "json",
-            data: {"studentId": id },
+            data: {"studentId": localStorage.getItem("id") },
             success: function (result) {
                 var text = `<h1>Assign a Grade Card</h1><p><strong>Grad:</strong> ${result.Grad}</p>
                 <table class="center" style="width:20%"><tr>
