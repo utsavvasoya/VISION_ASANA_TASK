@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { pay, successPayment } = require('../controller/paymentController');
+const { payForPaypal, successPaymentPaypal, paymentStripe } = require('../controller/paymentController');
 
-router.post('/pay', pay)
-router.get('/success', successPayment)
+router.post('/pay', payForPaypal)
+router.get('/success', successPaymentPaypal)
 router.get('/cancel', (req, res) => res.send('Cancelled'));
+router.post('/paymentStripe', paymentStripe)
 
 module.exports = router;

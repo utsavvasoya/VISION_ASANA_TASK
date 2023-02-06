@@ -16,8 +16,7 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        .modal,
-        .paymentModel {
+        .modal {
             display: none;
             position: fixed;
             z-index: 1;
@@ -40,7 +39,8 @@
         }
 
         .close,
-        .closepayment {
+        .closepayment,
+        .closestripe {
             color: #aaaaaa;
             float: right;
             font-size: 28px;
@@ -50,7 +50,9 @@
         .close:hover,
         .close:focus,
         .closepayment:hover,
-        .closepayment:focus {
+        .closepayment:focus,
+        .closestripe:hover,
+        .closestripe:focus {
             color: #000;
             text-decoration: none;
             cursor: pointer;
@@ -88,6 +90,31 @@
             </form>
         </div>
     </div>
+    <div id="stripeForm" class="modal">
+        <div class="modal-content">
+            <span class="closestripe">&times;</span>
+            <form>
+                <input type="hidden" name="token" />
+                <div class="container">
+                    <div>
+                        <div class="col-sm form-group">
+                            <label for="name">Card number</label>
+                            <input id="card" name="card" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm form-group">
+                            <label for="name">Expiry date</label>
+                            <input id="date" name="date" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm form-group">
+                            <label for="name">CVC</label>
+                            <input id="cvc" name="cvc" type="number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <button id="stripePay" class="btn btn-primary btn-block" type="submit">Pay</button>
+            </form>
+        </div>
+    </div>
     <div id="paymentModel" class="modal">
         <div class="modal-content">
             <span class="closepayment">&times;</span>
@@ -106,6 +133,7 @@
                 </div>
                 <div class="modal-footer">
                     <button id="paypal" class="btn btn-primary btn-block">Pay With Paypal</button>
+                    <button id="paystripe" class="btn btn-primary btn-block">Pay With Stripe</button>
                 </div>
             </form>
         </div>
@@ -200,7 +228,7 @@
             window.location.href = `/dashbord`
         })
     })
-    var modal = document.getElementById("myModal");
+    var stripeForm = document.getElementById("stripeForm");
     var btn = document.getElementById("myBtn");
     var span = document.getElementsByClassName("close")[0];
     btn.onclick = function () {
@@ -210,7 +238,7 @@
         modal.style.display = "none";
     }
     window.onclick = function (event) {
-        if (event.target == modal) {
+        if (event.target == stripeForm) {
             modal.style.display = "none";
         }
     }
@@ -228,8 +256,24 @@
             paymentModel.style.display = "none";
         }
     }
+    var stripeForm = document.getElementById("stripeForm");
+    var paystripe = document.getElementById("paystripe");
+    var span = document.getElementsByClassName("closestripe")[0];
+    paystripe.onclick = function (e) {
+        e.preventDefault()
+        paymentModel.style.display = "none";
+        stripeForm.style.display = "block";
+
+    }
+    span.onclick = function () {
+        stripeForm.style.display = "none";
+    }
+    window.onclick = function (event) {
+        if (event.target == stripeForm) {
+            stripeForm.style.display = "none";
+        }
+    }
     $('#paypal').click((e) => {
-        debugger
         e.preventDefault();
         var bookname = $('#bookname').val()
         var price = $('#price').val()
@@ -237,6 +281,26 @@
         $.ajax({
             type: "POST",
             url: "/pay",
+            dataType: "json",
+            data: data,
+            success: function (result) {
+                if (result.message) {
+                    window.location.href = result.message;
+                } else {
+                    showErrMessage("Something went wrong!")
+                }
+            }
+        });
+    })
+    $('#stripePay').click((e) => {
+        e.preventDefault();
+        debugger
+        var bookname = $('#bookname').val()
+        var price = $('#price').val()
+        const data = { bookname, price }
+        $.ajax({
+            type: "POST",
+            url: "/paymentStripe",
             dataType: "json",
             data: data,
             success: function (result) {

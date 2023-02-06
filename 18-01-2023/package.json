@@ -20,6 +20,7 @@
     "local-storage": "^2.0.0",
     "localStorage": "^1.0.4",
     "mongoose": "^6.8.4",
-    "paypal-rest-sdk": "^1.8.1"
+    "paypal-rest-sdk": "^1.8.1",
+    "stripe": "^11.9.1"
   }
 }

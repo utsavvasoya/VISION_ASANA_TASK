@@ -1,7 +1,8 @@
 const paypal = require('paypal-rest-sdk');
 const paymentSchema = require("../models/payment");
+const stripe = require('stripe')('sk_test_51KCGKeSHA3evzryH3R6yRrg7YYlZgk8jrTUysWtb6YQETYQkpzZJzXmk6Os8G7LDAcDqNyhZJnUY8phPp29HVVte00rijlPyZK')
 
-exports.pay = async (req, res) => {
+exports.payForPaypal = async (req, res) => {
     const create_payment_json = {
         "intent": "sale",
         "payer": {
@@ -38,7 +39,7 @@ exports.pay = async (req, res) => {
         }
     });
 }
-exports.successPayment = async (req, res) => {
+exports.successPaymentPaypal = async (req, res) => {
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
 
@@ -58,7 +59,30 @@ exports.successPayment = async (req, res) => {
             });
             await newpayment.save();
             res.redirect('/home')
-            // res.json({message: "Your payment is successfull"});
         }
     });
+}
+
+exports.paymentStripe = async (req, res) => {
+    var price = req.body.price
+    var bookname = req.body.bookname
+    stripe.customers.create({
+        email: req.body.stripeEmail,
+        source: req.body.stripeToken,
+    })
+        .then((customer) => {
+            return stripe.charges.create({
+                amount: req.body.amount * 100,
+                description: req.body.description,
+                currency: 'INR',
+                customer: customer.id
+            });
+        })
+        .then((charge) => {
+            res.send("Success")
+            console.log(charge)
+        })
+        .catch((err) => {
+            res.send("Invalid Card number")
+        });
 }
