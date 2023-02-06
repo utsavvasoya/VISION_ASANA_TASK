@@ -302,7 +302,7 @@ exports.homePage = async (req, res) => {
     try {
         const data = await studentSchema.find();
         const userData = await registerSchema.find();
-        res.render("home", { Data: data, UserData: userData, key: 'pk_test_51MYR6ySBCSCxMm89lO0xLD1WkarXNSi0QlEGiHRwBKGHIT5jN4er3gSz8nCWeCdVzIB523jbxpu8DSf382xTjlkx00iqlZia44' })
+        res.render("home", { Data: data, UserData: userData})
     } catch {
         console.log(err);
         return res.json({

@@ -1,6 +1,6 @@
 const paypal = require('paypal-rest-sdk');
 const paymentSchema = require("../models/payment");
-const stripe = require('stripe')('sk_test_51KCGKeSHA3evzryH3R6yRrg7YYlZgk8jrTUysWtb6YQETYQkpzZJzXmk6Os8G7LDAcDqNyhZJnUY8phPp29HVVte00rijlPyZK')
+const stripe = require('stripe')('sk_test_Czcmd6nNU3pu0sUjKGT3TYAf')
 
 exports.payForPaypal = async (req, res) => {
     const create_payment_json = {
@@ -64,25 +64,42 @@ exports.successPaymentPaypal = async (req, res) => {
 }
 
 exports.paymentStripe = async (req, res) => {
-    var price = req.body.price
-    var bookname = req.body.bookname
+    var exp = req.body.expdate
+    var expDate = exp.split('/')
     stripe.customers.create({
-        email: req.body.stripeEmail,
-        source: req.body.stripeToken,
+        name: req.body.bookname
     })
-        .then((customer) => {
+        .then(async (customer) => {
+            const card_token = await stripe.tokens.create({
+                card: {
+                    number: req.body.cardnumber,
+                    exp_month: expDate[0],
+                    exp_year: expDate[1],
+                    cvc: req.body.cvc
+                }
+            })
+            const card = await stripe.customers.createSource(customer.id, {
+                source: card_token.id
+            })
             return stripe.charges.create({
-                amount: req.body.amount * 100,
-                description: req.body.description,
+                amount: req.body.price * 100,
+                description: req.body.bookname,
                 currency: 'INR',
                 customer: customer.id
             });
         })
-        .then((charge) => {
+        .then(async (charge) => {
+            const newpayment = new paymentSchema({
+                paymentId: charge.id,
+                paymentAmount: charge.amount,
+                paymentMethod: "Stripe",
+                paymentCurrency: charge.currency
+            });
+            await newpayment.save();
             res.send("Success")
-            console.log(charge)
         })
         .catch((err) => {
+            console.log(err);
             res.send("Invalid Card number")
         });
 }
