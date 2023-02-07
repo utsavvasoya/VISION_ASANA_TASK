@@ -35,12 +35,13 @@
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 25%;
+            width: 28%;
         }
 
         .close,
         .closepayment,
-        .closestripe {
+        .closestripe,
+        .closenet {
             color: #aaaaaa;
             float: right;
             font-size: 28px;
@@ -52,7 +53,9 @@
         .closepayment:hover,
         .closepayment:focus,
         .closestripe:hover,
-        .closestripe:focus {
+        .closestripe:focus,
+        .closenet:hover,
+        .closenet:focus {
             color: #000;
             text-decoration: none;
             cursor: pointer;
@@ -99,7 +102,7 @@
                     <div>
                         <div class="col-sm form-group">
                             <label for="name">Card number</label>
-                            <input id="cardnumber" name="cardnumber" type="text" class="form-control">
+                            <input id="cardnumber" name="cardnumber" type="number" class="form-control">
                         </div>
                         <div class="col-sm form-group">
                             <label for="name">Expiry date</label>
@@ -112,6 +115,31 @@
                     </div>
                 </div>
                 <button id="stripePay" class="btn btn-primary btn-block" type="submit">Pay</button>
+            </form>
+        </div>
+    </div>
+    <div id="netForm" class="modal">
+        <div class="modal-content">
+            <span class="closenet">&times;</span>
+            <form>
+                <input type="hidden" name="token" />
+                <div class="container">
+                    <div>
+                        <div class="col-sm form-group">
+                            <label for="name">Card number</label>
+                            <input id="authcardnumber" name="authcardnumber" type="number" class="form-control">
+                        </div>
+                        <div class="col-sm form-group">
+                            <label for="name">Expiry date</label>
+                            <input id="auhtexpdate" name="auhtexpdate" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm form-group">
+                            <label for="name">CVC</label>
+                            <input id="authcvc" name="authcvc" type="number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <button id="netPay" class="btn btn-primary btn-block" type="submit">Pay</button>
             </form>
         </div>
     </div>
@@ -132,8 +160,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="paypal" class="btn btn-primary btn-block">Pay With Paypal</button>
+                    <button id="paypal" style="margin-top: 11px;" class="btn btn-primary btn-block">Pay With Paypal</button>
                     <button id="paystripe" class="btn btn-primary btn-block">Pay With Stripe</button>
+                    <button id="paynet" class="btn btn-primary btn-block">Pay With Authorize.Net</button>
                 </div>
             </form>
         </div>
@@ -222,7 +251,7 @@
             window.location.href = `/dashbord`
         })
     })
-    var stripeForm = document.getElementById("stripeForm");
+    var modal = document.getElementById("myModal");
     var btn = document.getElementById("myBtn");
     var span = document.getElementsByClassName("close")[0];
     btn.onclick = function () {
@@ -232,7 +261,7 @@
         modal.style.display = "none";
     }
     window.onclick = function (event) {
-        if (event.target == stripeForm) {
+        if (event.target == modal) {
             modal.style.display = "none";
         }
     }
@@ -257,7 +286,6 @@
         e.preventDefault()
         paymentModel.style.display = "none";
         stripeForm.style.display = "block";
-
     }
     span.onclick = function () {
         stripeForm.style.display = "none";
@@ -265,6 +293,22 @@
     window.onclick = function (event) {
         if (event.target == stripeForm) {
             stripeForm.style.display = "none";
+        }
+    }
+    var netForm = document.getElementById("netForm");
+    var paynet = document.getElementById("paynet");
+    var closenet = document.getElementsByClassName("closenet")[0];
+    paynet.onclick = function (e) {
+        e.preventDefault()
+        paymentModel.style.display = "none";
+        netForm.style.display = "block";
+    }
+    closenet.onclick = function () {
+        netForm.style.display = "none";
+    }
+    window.onclick = function (event) {
+        if (event.target == netForm) {
+            netForm.style.display = "none";
         }
     }
     $('#paypal').click((e) => {
@@ -301,9 +345,32 @@
             data: data,
             success: function (result) {
                 if (result.message) {
-                    window.location.href = result.message;
+                    window.location.href = '/home';
                 } else {
                     showErrMessage("Something went wrong!")
+                }
+            }
+        });
+    })
+    $('#netPay').click((e) => {
+        debugger
+        e.preventDefault();
+        var bookname = $('#bookname').val()
+        var amount = $('#price').val()
+        var cc = $('#authcardnumber').val()
+        var expire = $('#auhtexpdate').val()
+        var cvv = $('#authcvc').val()
+        const data = { bookname, amount, cc, expire, cvv }
+        $.ajax({
+            type: "POST",
+            url: "/authorize",
+            dataType: "json",
+            data: data,
+            success: function (result) {
+                if (result.message) {
+                    window.location.href = '/home';
+                } else {
+                    showErrMessage(result.error)
                 }
             }
         });

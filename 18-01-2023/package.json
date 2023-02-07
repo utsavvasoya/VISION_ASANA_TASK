@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "authorizenet": "^1.0.8",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",
     "dotenv": "^16.0.3",
@@ -21,6 +22,7 @@
     "localStorage": "^1.0.4",
     "mongoose": "^6.8.4",
     "paypal-rest-sdk": "^1.8.1",
-    "stripe": "^11.9.1"
+    "stripe": "^11.9.1",
+    "validator": "^13.9.0"
   }
 }
