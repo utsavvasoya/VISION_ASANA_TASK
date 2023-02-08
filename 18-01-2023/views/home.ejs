@@ -160,7 +160,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="paypal" style="margin-top: 11px;" class="btn btn-primary btn-block">Pay With Paypal</button>
+                    <button id="paypal" style="margin-top: 11px;" class="btn btn-primary btn-block">Pay With
+                        Paypal</button>
                     <button id="paystripe" class="btn btn-primary btn-block">Pay With Stripe</button>
                     <button id="paynet" class="btn btn-primary btn-block">Pay With Authorize.Net</button>
                 </div>
@@ -284,6 +285,9 @@
     var span = document.getElementsByClassName("closestripe")[0];
     paystripe.onclick = function (e) {
         e.preventDefault()
+        if ($('#bookname').val() == "" || $('#price').val() == "") {
+            return showErrMessage("Enter bookname and price.")
+        }
         paymentModel.style.display = "none";
         stripeForm.style.display = "block";
     }
@@ -300,6 +304,9 @@
     var closenet = document.getElementsByClassName("closenet")[0];
     paynet.onclick = function (e) {
         e.preventDefault()
+        if ($('#bookname').val() == "" || $('#price').val() == "") {
+            return showErrMessage("Enter bookname and price.")
+        }
         paymentModel.style.display = "none";
         netForm.style.display = "block";
     }
@@ -315,6 +322,9 @@
         e.preventDefault();
         var bookname = $('#bookname').val()
         var price = $('#price').val()
+        if (bookname == "" || price == "") {
+            return showErrMessage("Enter bookname and price.")
+        }
         const data = { bookname, price }
         $.ajax({
             type: "POST",
@@ -347,13 +357,12 @@
                 if (result.message) {
                     window.location.href = '/home';
                 } else {
-                    showErrMessage("Something went wrong!")
+                    showErrMessage(result.error)
                 }
             }
         });
     })
     $('#netPay').click((e) => {
-        debugger
         e.preventDefault();
         var bookname = $('#bookname').val()
         var amount = $('#price').val()

@@ -67,8 +67,40 @@ exports.successPaymentPaypal = async (req, res) => {
 }
 
 exports.paymentStripe = async (req, res) => {
+    const errors = [];
+    if (!validator.isCreditCard(req.body.cardnumber)) {
+        errors.push({
+            param: 'cc',
+            msg: 'Invalid credit card number.'
+        });
+    }
+
+    if (!/^\d{3}$/.test(req.body.cvc)) {
+        errors.push({
+            param: 'cvv',
+            msg: 'Invalid CVV code.'
+        });
+    }
+
+    if (!/^\d{4}$/.test(req.body.expdate)) {
+        errors.push({
+            param: 'expire',
+            msg: 'Invalid expiration date.'
+        });
+    }
+
+    if (!validator.isDecimal(req.body.price)) {
+        errors.push({
+            param: 'amount',
+            msg: 'Invalid amount.'
+        });
+    }
+    if (errors.length > 0) {
+        return res.json({ error: "Enter valid card details." })
+    }
     var exp = req.body.expdate
-    var expDate = exp.split('/')
+    var exp_month = exp.slice(0, 2)
+    var exp_year = exp.slice(2, 4)
     stripe.customers.create({
         name: req.body.bookname
     })
@@ -76,8 +108,8 @@ exports.paymentStripe = async (req, res) => {
             const card_token = await stripe.tokens.create({
                 card: {
                     number: req.body.cardnumber,
-                    exp_month: expDate[0],
-                    exp_year: expDate[1],
+                    exp_month: exp_month,
+                    exp_year: exp_year,
                     cvc: req.body.cvc
                 }
             })
@@ -103,7 +135,7 @@ exports.paymentStripe = async (req, res) => {
         })
         .catch((err) => {
             console.log(err);
-            res.send("Invalid Card number")
+            res.json({ error: err.message })
         });
 }
 
