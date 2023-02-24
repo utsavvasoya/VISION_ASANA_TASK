@@ -1,0 +1,149 @@
+Breif Introduction
+What is Node .js
+What is MongoDb
+How many Apis you can make in a Day
+In Which Project You are working Now
+Question About all Old Project
+What Driver App is Doing Its full structure
+What is Campaign Wizard App & its full Structure
+How do you do logging in Node.js
+Some Question about JS
+Question regarding MongoDb
+
+map → Executes a function on each element of an array. Every element of the array is passed to the callback function and returns a new array with the same length.
+
+filter → Remove items which don't satisfy a condition.
+
+Reduce → Creates a single value from elements of Array.
+
+DESIGN PATTERNS IN NODE JS → Design patterns are "blueprints" prepared in a way to solve one (or more) problems in a way that's easy to implement and reuse. It also helps your team to understand your code better
+
+what is dependency injection in node js ? - https://tsh.io/blog/dependency-injection-in-node-js/
+1) why node js is single thread
+2) explain error handling with local and global
+3) explain spread operartor in javascript
+4) how to authenticate node js application
+5) explain proptotype in javascript
+6) how to design api without blocking i/o operations
+
+
+Event Loop,
+setImmediate(),
+Object destructuring,
+Difference btw SQL & nosql db,
+Object.create,
+What is nest.js,
+Object Cloning,
+Arrow Functions,
+Promises,
+Async/Await,
+Es6 features used,
+Frameworks used for Node.js,
+
+1xx: Information - 100 Continue
+2xx: Successful - 200 OK/201 Created/202 Accepted
+3xx: Redirection - 302 Found/307 Temporary Redirect/308 Permanent Redirect
+4xx: Clientx Error - 400 Bad Request/401 Unauthorized/403 Forbidden/404 Not Found/409 Conflict
+5xx: Server Error - 500 Internal Server Error/502 Bad Gateway/503 Service Unavailable/504 Gateway Timeout
+
+is node.js multithreaded or single-threaded
+when to use mongodb
+why we use mongodb
+difference between let,var,const
+what is replica  - synchronizing data across multiple servers. provides redundancy and increases data availability with multiple copies of data on different database servers.
+what is aggregation in mongodb
+what is event driven
+latest version of ES
+promis.all
+
+How to Check if an Object is Empty in JavaScript
+what is the output of this (null == undefined)
+what is the output of this (null === undefined)
+how to run multiple functions at the same time
+how to get object keys in js
+what is the output of this
+const obj = {a: 1, b: 2};
+console.log(Object.keys(obj));
+
+
+what is authentication and authorization
+what is stub
+node is single threded then how it possible
+
+Promise.resolve(1)
+.then((x)=>x+1)
+.then((x)=>{throw new Error('My error')})
+.catch(()=>1)
+.then((x)=>x+1)
+.then((x)=>console.log(x))
+.catch(console.error)
+
+rxjs operators and its type - Rxjs Operators are special type of functions that take input as an observable and then return an observable as an output that means Operators work with observable to make various kind of operations in angular or JavaScript. Operators may help us make Angular application more faster. 2 type (Static & Instance operators)
+
+for loop vs for each loop,
+difference between http and https
+What is SPA,
+what is DB and type of DBs,
+What is Primary and Secondary Indexing
+Type of Indexing - Single Field/Multikey Index/Hashed Indexes/Clustered Indexes
+
+Call invokes the function and allows you to pass in arguments one by one.
+Apply invokes the function and allows you to pass in arguments as an array.
+Bind returns a new function, allowing you to pass in a this array and any number of arguments.
+
+What is lazy loading in Nodejs?
+By default, modules are eagerly loaded, which means that as soon as the application loads, so do all the modules, whether or not they are immediately necessary.
+
+
+
+
+fibonacci series
+----------------------------
+const number = parseInt(prompt('Enter the number of terms: '));
+let n1 = 0, n2 = 1, nextTerm;
+
+console.log('Fibonacci Series:');
+
+for (let i = 1; i <= 10; i++) {
+    console.log(n1);
+    nextTerm = n1 + n2;
+    n1 = n2;
+    n2 = nextTerm;
+}
+
+
+Prime number
+------------------------------
+const number = parseInt(prompt("Enter a positive number: "));
+let isPrime = true;
+if (number === 1) {
+    console.log("1 is neither prime nor composite number.");
+}
+
+else if (number > 1) {
+    for (let i = 2; i < number; i++) {
+        if (number % i == 0) {
+            isPrime = false;
+            break;
+        }
+    }
+    if (isPrime) {
+        console.log(`${number} is a prime number`);
+    } else {
+        console.log(`${number} is a not prime number`);
+    }
+}
+
+else {
+    console.log("The number is not a prime number.");
+}
+
+Palindrome 
+-----------------------------
+var a = "nan"
+var reverse = a.split('').reverse().join('')
+ if(a==reverse){
+     console.log("palindrome")
+ }else {
+     console.log("not palindrome")
+ }
